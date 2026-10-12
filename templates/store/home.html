@@ -4,5 +4,25 @@
 
 {% block content %}
   <h1>Welcome to Radhe Krishna Store</h1>
-  <p>Photo frames, glasses, decor and trendy aesthetic items.</p>
+
+  <h2>Categories</h2>
+  <ul>
+    {% for category in categories %}
+      <li>{{ category.name }}</li>
+    {% empty %}
+      <li>No categories yet.</li>
+    {% endfor %}
+  </ul>
+
+  <h2>New arrivals</h2>
+  <ul>
+    {% for product in products %}
+      <li>
+        {{ product.name }} - ₹{{ product.price|floatformat:"0g" }}
+        (stock: {{ product.stock }})
+      </li>
+    {% empty %}
+      <li>No products yet.</li>
+    {% endfor %}
+  </ul>
 {% endblock %}
