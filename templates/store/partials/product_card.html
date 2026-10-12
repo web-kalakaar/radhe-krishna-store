@@ -1,4 +1,5 @@
 <article class="card{% if not product.in_stock %} card--soldout{% endif %}">
+  <a class="card__link" href="{% url 'store:product_detail' product.slug %}">
   <div class="card__media">
     {% with image=product.main_image %}
       {% if image %}
@@ -30,5 +31,5 @@
     {% if product.in_stock and product.stock <= 5 %}
       <p class="card__stock">Only {{ product.stock }} left</p>
     {% endif %}
-  </div>
+  </div></a>
 </article>

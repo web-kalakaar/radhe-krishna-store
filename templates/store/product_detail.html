@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+  <nav class="breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a> /
+    <a href="{% url 'store:category_detail' product.category.slug %}">{{ product.category.name }}</a> /
+    {{ product.name }}
+  </nav>
+
+  <div class="detail">
+    <section class="gallery">
+      <div class="gallery__main">
+        {% with image=product.main_image %}
+          {% if image %}
+            <img id="main-image" src="{{ image.image.url }}" alt="{{ product.name }}">
+          {% else %}
+            <div class="card__placeholder">No image</div>
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      {% if product.images.all|length > 1 %}
+        <div class="gallery__thumbs">
+          {% for image in product.images.all %}
+            <img class="thumb" src="{{ image.image.url }}"
+                 alt="{{ product.name }} photo {{ forloop.counter }}">
+          {% endfor %}
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="info">
+      {% if product.brand %}
+        <p class="info__brand">{{ product.brand }}</p>
+      {% endif %}
+      <h1>{{ product.name }}</h1>
+
+      <p class="info__price">
+        {% if product.discount_percent %}
+          <span class="off off--big">-{{ product.discount_percent }}%</span>
+        {% endif %}
+        <span class="price price--big">₹{{ product.price|floatformat:"0g" }}</span>
+      </p>
+      {% if product.discount_percent %}
+        <p class="info__mrp">M.R.P.: <span class="mrp">₹{{ product.mrp|floatformat:"0g" }}</span></p>
+      {% endif %}
+
+      {% if product.in_stock %}
+        {% if product.stock <= 5 %}
+          <p class="stock stock--low">Only {{ product.stock }} left in stock</p>
+        {% else %}
+          <p class="stock stock--ok">In stock</p>
+        {% endif %}
+      {% else %}
+        <p class="stock stock--out">Currently out of stock</p>
+      {% endif %}
+
+      {% if product.description %}
+        <h2>About this item</h2>
+        {{ product.description|linebreaks }}
+      {% endif %}
+
+      {% if product.features.all %}
+        <h2>Key features</h2>
+        <table class="features">
+          {% for feature in product.features.all %}
+            <tr>
+              <th>{{ feature.name }}</th>
+              <td>{{ feature.value }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}

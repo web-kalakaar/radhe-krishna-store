@@ -21,3 +21,13 @@ def category_detail(request, slug):
         "store/category_detail.html",
         {"category": category, "products": products},
     )
+    
+def product_detail(request, slug):
+    product = get_object_or_404(
+        Product.objects.select_related("category").prefetch_related(
+            "images", "features"
+        ),
+        slug=slug,
+        is_available=True,
+    )
+    return render(request, "store/product_detail.html", {"product": product})
