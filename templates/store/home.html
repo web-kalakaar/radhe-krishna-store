@@ -8,7 +8,7 @@
   <h2>Categories</h2>
   <ul>
     {% for category in categories %}
-      <li>{{ category.name }}</li>
+      <li><a href="{% url 'store:category_detail' category.slug %}">{{ category.name }}</a></li>
     {% empty %}
       <li>No categories yet.</li>
     {% endfor %}

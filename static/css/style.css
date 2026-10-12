@@ -186,3 +186,8 @@ main {
   background: #333;
   border-radius: 4px;
 }
+.breadcrumb {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #6b6458;
+}
