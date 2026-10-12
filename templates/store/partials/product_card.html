@@ -1,0 +1,34 @@
+<article class="card{% if not product.in_stock %} card--soldout{% endif %}">
+  <div class="card__media">
+    {% with image=product.main_image %}
+      {% if image %}
+        <img src="{{ image.image.url }}" alt="{{ product.name }}" loading="lazy">
+      {% else %}
+        <div class="card__placeholder">No image</div>
+      {% endif %}
+    {% endwith %}
+
+    {% if not product.in_stock %}
+      <span class="badge">Out of stock</span>
+    {% endif %}
+  </div>
+
+  <div class="card__body">
+    {% if product.brand %}
+      <p class="card__brand">{{ product.brand }}</p>
+    {% endif %}
+    <h3 class="card__title">{{ product.name }}</h3>
+
+    <p class="card__price">
+      <span class="price">₹{{ product.price|floatformat:"0g" }}</span>
+      {% if product.discount_percent %}
+        <span class="mrp">₹{{ product.mrp|floatformat:"0g" }}</span>
+        <span class="off">{{ product.discount_percent }}% off</span>
+      {% endif %}
+    </p>
+
+    {% if product.in_stock and product.stock <= 5 %}
+      <p class="card__stock">Only {{ product.stock }} left</p>
+    {% endif %}
+  </div>
+</article>

@@ -14,15 +14,12 @@
     {% endfor %}
   </ul>
 
-  <h2>New arrivals</h2>
-  <ul>
+    <h2>New arrivals</h2>
+  <div class="product-grid">
     {% for product in products %}
-      <li>
-        {{ product.name }} - ₹{{ product.price|floatformat:"0g" }}
-        (stock: {{ product.stock }})
-      </li>
+      {% include "store/partials/product_card.html" %}
     {% empty %}
-      <li>No products yet.</li>
+      <p>No products yet.</p>
     {% endfor %}
-  </ul>
+  </div>
 {% endblock %}
