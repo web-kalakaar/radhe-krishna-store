@@ -1,0 +1,92 @@
+:root {
+  --color-bg: #faf7f2;
+  --color-text: #2b2b2b;
+  --color-primary: #b5483a;
+  --color-border: #e5ded3;
+  --max-width: 1100px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+main {
+  flex: 1;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Header */
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.nav a {
+  margin-left: 1rem;
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.nav a:hover {
+  color: var(--color-primary);
+}
+
+/* Flash messages */
+.messages {
+  margin-top: 1rem;
+}
+
+.message {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.message--success { border-color: #2e7d32; }
+.message--error   { border-color: #c62828; }
+.message--warning { border-color: #ed6c02; }
+.message--info    { border-color: #0277bd; }
+
+/* Footer */
+.site-footer {
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+  border-top: 1px solid var(--color-border);
+}
