@@ -358,3 +358,26 @@ main {
   color: #c62828;
   margin: 0.25rem 0;
 }
+
+
+/* Search box */
+.site-header__inner {
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.search {
+  display: flex;
+  flex: 1;
+  gap: 0.4rem;
+  max-width: 420px;
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  font: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}

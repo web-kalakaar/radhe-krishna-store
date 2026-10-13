@@ -1,6 +1,13 @@
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="brand" href="{% url 'store:home' %}">Radhe Krishna Store</a>
+
+    <form class="search" action="{% url 'store:search' %}" method="get" role="search">
+      <input type="search" name="q" value="{{ request.GET.q }}"
+             placeholder="Search products" aria-label="Search products" maxlength="100">
+      <button type="submit" class="btn">Search</button>
+    </form>
+
     <nav class="nav">
       <a href="{% url 'store:home' %}">Home</a>
     </nav>

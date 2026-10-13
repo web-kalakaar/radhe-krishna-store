@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render
 from .forms import ProductFilterForm
 from .models import Category, Product
-
+from django.db.models import Q
 
 def home(request):
     categories = Category.objects.all()
@@ -35,3 +35,23 @@ def product_detail(request, slug):
         is_available=True,
     )
     return render(request, "store/product_detail.html", {"product": product})
+
+def search(request):
+    query = request.GET.get("q", "").strip()[:100]
+    products = Product.objects.none()
+
+    if query:
+        products = Product.objects.filter(is_available=True)
+        for word in query.split():
+            products = products.filter(
+                Q(name__icontains=word)
+                | Q(brand__icontains=word)
+                | Q(category__name__icontains=word)
+            )
+        products = products.prefetch_related("images")
+
+    return render(
+        request,
+        "store/search.html",
+        {"query": query, "products": products},
+    )
