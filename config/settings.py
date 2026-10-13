@@ -128,6 +128,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+# Authentication
+LOGIN_URL = "accounts:login"
+LOGIN_REDIRECT_URL = "store:home"
+LOGOUT_REDIRECT_URL = "store:home"
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

@@ -505,3 +505,40 @@ main {
   width: 100%;
   padding: 0.6rem 1rem;
 }
+/* Navbar account links */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav a {
+  margin-left: 0;
+}
+
+.nav__form {
+  margin: 0;
+}
+
+.nav__user {
+  color: #6b6458;
+}
+
+.link-button {
+  padding: 0;
+  font: inherit;
+  color: var(--color-text);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--color-primary);
+}
+
+.form-note {
+  margin: 1rem 0 0;
+  font-size: 0.9rem;
+  text-align: center;
+}

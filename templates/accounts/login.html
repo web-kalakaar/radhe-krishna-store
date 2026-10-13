@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Log in{% endblock %}
+
+{% block content %}
+  <div class="form-card">
+    <h1>Log in</h1>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% include "partials/form_fields.html" %}
+      <button type="submit" class="btn btn--block">Log in</button>
+    </form>
+
+    <p class="form-note">New here? <a href="{% url 'accounts:signup' %}">Create an account</a></p>
+  </div>
+{% endblock %}
