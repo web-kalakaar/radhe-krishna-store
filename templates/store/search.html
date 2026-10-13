@@ -5,15 +5,17 @@
 {% block content %}
   {% if query %}
     <h1>Results for "{{ query }}"</h1>
-    <p>{{ products|length }} item{{ products|length|pluralize }} found</p>
+    <p>{{ page_obj.paginator.count }} item{{ page_obj.paginator.count|pluralize }} found</p>
 
     <div class="product-grid">
-      {% for product in products %}
+      {% for product in page_obj %}
         {% include "store/partials/product_card.html" %}
       {% empty %}
         <p>No products found. Try a different word.</p>
       {% endfor %}
     </div>
+
+    {% include "partials/pagination.html" %}
   {% else %}
     <h1>Search</h1>
     <p>Type a product name, brand or category in the search box.</p>

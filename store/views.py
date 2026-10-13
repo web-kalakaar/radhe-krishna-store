@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, render
 from .forms import ProductFilterForm
 from .models import Category, Product
 from django.db.models import Q
-
+from .utils import paginate
 def home(request):
     categories = Category.objects.all()
     products = Product.objects.filter(is_available=True).prefetch_related("images")[:8]
@@ -19,11 +19,17 @@ def category_detail(request, slug):
 
     form = ProductFilterForm(request.GET)
     products = form.filter_queryset(products)
+    page_obj, querystring = paginate(request, products)
 
     return render(
         request,
         "store/category_detail.html",
-        {"category": category, "products": products, "form": form},
+        {
+            "category": category,
+            "page_obj": page_obj,
+            "querystring": querystring,
+            "form": form,
+        },
     )
     
 def product_detail(request, slug):
@@ -35,7 +41,6 @@ def product_detail(request, slug):
         is_available=True,
     )
     return render(request, "store/product_detail.html", {"product": product})
-
 def search(request):
     query = request.GET.get("q", "").strip()[:100]
     products = Product.objects.none()
@@ -50,8 +55,10 @@ def search(request):
             )
         products = products.prefetch_related("images")
 
+    page_obj, querystring = paginate(request, products)
+
     return render(
         request,
         "store/search.html",
-        {"query": query, "products": products},
+        {"query": query, "page_obj": page_obj, "querystring": querystring},
     )

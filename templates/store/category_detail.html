@@ -3,46 +3,49 @@
 {% block title %}{{ category.name }}{% endblock %}
 
 {% block content %}
-  <nav class="breadcrumb">
-    <a href="{% url 'store:home' %}">Home</a> / {{ category.name }}
-  </nav>
+<nav class="breadcrumb">
+  <a href="{% url 'store:home' %}">Home</a> / {{ category.name }}
+</nav>
 
-  <h1>{{ category.name }}</h1>
+<h1>{{ category.name }}</h1>
 
-  <form method="get" class="filters">
-    <div class="filters__group">
-      <label for="{{ form.min_price.id_for_label }}">Price</label>
-      {{ form.min_price }}
-      <span>to</span>
-      {{ form.max_price }}
-    </div>
+<form method="get" class="filters">
+  <div class="filters__group">
+    <label for="{{ form.min_price.id_for_label }}">Price</label>
+    {{ form.min_price }}
+    <span>to</span>
+    {{ form.max_price }}
+  </div>
 
-    <div class="filters__group">
-      <label for="{{ form.sort.id_for_label }}">{{ form.sort.label }}</label>
-      {{ form.sort }}
-    </div>
+  <div class="filters__group">
+    <label for="{{ form.sort.id_for_label }}">{{ form.sort.label }}</label>
+    {{ form.sort }}
+  </div>
 
-    <label class="filters__check">
-      {{ form.in_stock }} {{ form.in_stock.label }}
-    </label>
+  <label class="filters__check">
+    {{ form.in_stock }} {{ form.in_stock.label }}
+  </label>
 
-    <button type="submit" class="btn">Apply</button>
-    <a href="{% url 'store:category_detail' category.slug %}">Clear</a>
-  </form>
+  <button type="submit" class="btn">Apply</button>
+  <a href="{% url 'store:category_detail' category.slug %}">Clear</a>
+</form>
 
-  {% for field in form %}
-    {% for error in field.errors %}
-      <p class="form-error">{{ error }}</p>
-    {% endfor %}
-  {% endfor %}
+{% for field in form %}
+{% for error in field.errors %}
+<p class="form-error">{{ error }}</p>
+{% endfor %}
+{% endfor %}
 
-  <p>{{ products|length }} item{{ products|length|pluralize }}</p>
+  <p>{{ page_obj.paginator.count }} item{{ page_obj.paginator.count|pluralize }}</p>
+
 
   <div class="product-grid">
-    {% for product in products %}
+    {% for product in page_obj %}
       {% include "store/partials/product_card.html" %}
     {% empty %}
       <p>No products found.</p>
     {% endfor %}
   </div>
+
+  {% include "partials/pagination.html" %}
 {% endblock %}
