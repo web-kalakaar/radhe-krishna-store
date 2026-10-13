@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Sign up{% endblock %}
+
+{% block content %}
+  <div class="form-card">
+    <h1>Create your account</h1>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+      <button type="submit" class="btn btn--block">Sign up</button>
+    </form>
+  </div>
+{% endblock %}
