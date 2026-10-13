@@ -307,3 +307,54 @@ main {
 .features th {
   width: 40%;
 }
+/* Filters */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.filters__group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.filters input[type="number"] {
+  width: 90px;
+}
+
+.filters input[type="number"],
+.filters select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.filters__check {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.btn {
+  padding: 0.4rem 1rem;
+  font: inherit;
+  color: #fff;
+  background: var(--color-primary);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-error {
+  color: #c62828;
+  margin: 0.25rem 0;
+}
