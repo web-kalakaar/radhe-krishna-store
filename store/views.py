@@ -3,13 +3,17 @@ from .forms import ProductFilterForm
 from .models import Category, Product
 from django.db.models import Q
 from .utils import paginate
+
 def home(request):
-    categories = Category.objects.all()
-    products = Product.objects.filter(is_available=True).prefetch_related("images")[:8]
+    available = Product.objects.filter(is_available=True).prefetch_related("images")
     return render(
         request,
         "store/home.html",
-        {"categories": categories, "products": products},
+        {
+            "categories": Category.objects.all(),
+            "featured_products": available.filter(is_featured=True)[:8],
+            "new_products": available[:8],
+        },
     )
 
 

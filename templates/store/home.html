@@ -3,23 +3,43 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-  <h1>Welcome to Radhe Krishna Store</h1>
+  <section class="hero">
+    <h1>Welcome to Radhe Krishna Store</h1>
+    <p>Photo frames, sunglasses, cups, bags, home decor and trendy aesthetic items.</p>
+  </section>
 
-  <h2>Categories</h2>
-  <ul>
-    {% for category in categories %}
-      <li><a href="{% url 'store:category_detail' category.slug %}">{{ category.name }}</a></li>
-    {% empty %}
-      <li>No categories yet.</li>
-    {% endfor %}
-  </ul>
+  <section class="section">
+    <h2>Shop by category</h2>
+    <div class="category-grid">
+      {% for category in categories %}
+        <a class="category-tile" href="{% url 'store:category_detail' category.slug %}">
+          {{ category.name }}
+        </a>
+      {% empty %}
+        <p>No categories yet.</p>
+      {% endfor %}
+    </div>
+  </section>
 
+  {% if featured_products %}
+    <section class="section">
+      <h2>Featured</h2>
+      <div class="product-grid">
+        {% for product in featured_products %}
+          {% include "store/partials/product_card.html" %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="section">
     <h2>New arrivals</h2>
-  <div class="product-grid">
-    {% for product in products %}
-      {% include "store/partials/product_card.html" %}
-    {% empty %}
-      <p>No products yet.</p>
-    {% endfor %}
-  </div>
+    <div class="product-grid">
+      {% for product in new_products %}
+        {% include "store/partials/product_card.html" %}
+      {% empty %}
+        <p>No products yet.</p>
+      {% endfor %}
+    </div>
+  </section>
 {% endblock %}
