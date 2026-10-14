@@ -44,7 +44,19 @@ def product_detail(request, slug):
         slug=slug,
         is_available=True,
     )
-    return render(request, "store/product_detail.html", {"product": product})
+
+    in_cart = 0
+    if request.user.is_authenticated:
+        item = product.cart_items.filter(cart__user=request.user).first()
+        in_cart = item.quantity if item else 0
+
+    return render(
+        request,
+        "store/product_detail.html",
+        {"product": product, "in_cart": in_cart},
+    )
+    
+    
 def search(request):
     query = request.GET.get("q", "").strip()[:100]
     products = Product.objects.none()

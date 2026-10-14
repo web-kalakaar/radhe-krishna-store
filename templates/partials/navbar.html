@@ -3,21 +3,23 @@
     <a class="brand" href="{% url 'store:home' %}">Radhe Krishna Store</a>
 
     <form class="search" action="{% url 'store:search' %}" method="get" role="search">
-      <input type="search" name="q" value="{{ request.GET.q }}"
-             placeholder="Search products" aria-label="Search products" maxlength="100">
+      <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Search products"
+        aria-label="Search products" maxlength="100">
       <button type="submit" class="btn">Search</button>
     </form>
 
     <nav class="nav">
       <a href="{% url 'store:home' %}">Home</a>
       {% if user.is_authenticated %}
-        <a href="{% url 'accounts:profile' %}">Hi, {{ user.username }}</a>        <form method="post" action="{% url 'accounts:logout' %}" class="nav__form">
-          {% csrf_token %}
-          <button type="submit" class="link-button">Log out</button>
-        </form>
+              <span class="nav__cart">Cart <span class="cart-count">{{ cart_count }}</span></span>
+      <a href="{% url 'accounts:profile' %}">Hi, {{ user.username }}</a>
+      <form method="post" action="{% url 'accounts:logout' %}" class="nav__form">
+        {% csrf_token %}
+        <button type="submit" class="link-button">Log out</button>
+      </form>
       {% else %}
-        <a href="{% url 'accounts:login' %}">Log in</a>
-        <a href="{% url 'accounts:signup' %}">Sign up</a>
+      <a href="{% url 'accounts:login' %}">Log in</a>
+      <a href="{% url 'accounts:signup' %}">Sign up</a>
       {% endif %}
     </nav>
   </div>

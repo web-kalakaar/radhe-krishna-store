@@ -600,3 +600,26 @@ a.btn {
 .btn--danger {
   background: #c62828;
 }
+.btn--large {
+  margin: 0.5rem 0 1rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+}
+.cart-count {
+  display: inline-block;
+  min-width: 1.4rem;
+  padding: 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.4rem;
+  text-align: center;
+  color: #fff;
+  background: var(--color-primary);
+  border-radius: 999px;
+}
+
+.in-cart {
+  margin: 0 0 1rem;
+  font-weight: 600;
+  color: #2e7d32;
+}
