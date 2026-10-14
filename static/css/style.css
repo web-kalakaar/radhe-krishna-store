@@ -587,3 +587,16 @@ main {
 .address p {
   margin: 0 0 0.25rem;
 }
+.address__actions a {
+  margin-right: 0.75rem;
+  font-size: 0.9rem;
+}
+
+a.btn {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.btn--danger {
+  background: #c62828;
+}

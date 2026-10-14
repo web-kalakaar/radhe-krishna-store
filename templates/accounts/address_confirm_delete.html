@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Delete address{% endblock %}
+
+{% block content %}
+  <div class="form-card">
+    <h1>Delete this address?</h1>
+    <p>{{ address }}</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn--danger">Yes, delete</button>
+      <a href="{% url 'accounts:profile' %}">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

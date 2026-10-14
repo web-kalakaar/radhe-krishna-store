@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
-
+from .models import Address, Profile, mobile_validator
 from .models import Profile, mobile_validator
 
 User = get_user_model()
@@ -48,3 +48,10 @@ class ProfileForm(forms.ModelForm):
         if commit:
             profile.save()
         return profile
+    
+class AddressForm(forms.ModelForm):
+    class Meta:
+        model = Address
+        fields = ["full_name", "line1", "line2", "city", "state", "pincode", "is_default"]
+        labels = {"is_default": "Make this my default address"}
+        widgets = {"pincode": forms.TextInput(attrs={"inputmode": "numeric"})}
