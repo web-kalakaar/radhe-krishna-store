@@ -34,3 +34,17 @@ class SignupForm(UserCreationForm):
         user = super().save(commit=commit)
         Profile.objects.create(user=user, mobile=self.cleaned_data["mobile"])
         return user
+    
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ["mobile"]
+        widgets = {"mobile": forms.TextInput(attrs={"inputmode": "numeric"})}
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        if "mobile" in self.changed_data:
+            profile.is_mobile_verified = False  # a new number must be verified again
+        if commit:
+            profile.save()
+        return profile

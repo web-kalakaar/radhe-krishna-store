@@ -1,8 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
-from .forms import SignupForm
+from .forms import ProfileForm, SignupForm
+from .models import Profile
 
 
 def signup(request):
@@ -20,3 +22,30 @@ def signup(request):
         form = SignupForm()
 
     return render(request, "accounts/signup.html", {"form": form})
+
+
+@login_required
+def profile(request):
+    # Users made with createsuperuser have no profile yet, so this may be None.
+    profile = Profile.objects.filter(user=request.user).first()
+
+    if request.method == "POST":
+        form = ProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+            messages.success(request, "Your profile has been updated.")
+            return redirect("accounts:profile")
+    else:
+        form = ProfileForm(instance=profile)
+
+    return render(
+        request,
+        "accounts/profile.html",
+        {
+            "form": form,
+            "profile": profile,
+            "addresses": request.user.addresses.all(),
+        },
+    )

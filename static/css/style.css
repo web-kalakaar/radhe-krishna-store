@@ -542,3 +542,48 @@ main {
   font-size: 0.9rem;
   text-align: center;
 }
+
+/* Profile page */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 800px) {
+  .profile-grid {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.profile-grid .form-card {
+  max-width: none;
+  margin: 0;
+}
+
+.profile-grid h2 {
+  margin-top: 0;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  background: #6b6458;
+  border-radius: 4px;
+}
+
+.tag--ok { background: #2e7d32; }
+.tag--warn { background: #ed6c02; }
+
+.address {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.address p {
+  margin: 0 0 0.25rem;
+}

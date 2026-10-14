@@ -1,6 +1,6 @@
+ 
 from django.conf import settings
 from django.core.validators import RegexValidator
-from django.db import models
 from django.db import models, transaction
 
 mobile_validator = RegexValidator(
@@ -29,7 +29,6 @@ class Address(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="addresses"
     )
     full_name = models.CharField(max_length=100)
-    mobile = models.CharField(max_length=10, validators=[mobile_validator])
     line1 = models.CharField("address line 1", max_length=200)
     line2 = models.CharField("address line 2", max_length=200, blank=True)
     city = models.CharField(max_length=100)
