@@ -733,3 +733,41 @@ a.btn {
   font-weight: 700;
   border-top: 1px solid var(--color-border);
 }
+/* Order detail */
+.tag--bad { background: #c62828; }
+
+.order-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.order-head h1 {
+  margin-bottom: 0.25rem;
+}
+
+.form-card--wide {
+  max-width: none;
+  margin: 1rem 0;
+}
+
+.form-card--wide h2 {
+  margin-top: 0;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (min-width: 800px) {
+  .info-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.info-grid .form-card {
+  margin: 0;
+}

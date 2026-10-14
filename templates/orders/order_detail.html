@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order.order_number }}{% endblock %}
+
+{% block content %}
+  <nav class="breadcrumb">
+    <a href="{% url 'store:home' %}">Home</a> / Order {{ order.order_number }}
+  </nav>
+
+  <div class="order-head">
+    <h1>Order {{ order.order_number }}</h1>
+    {% if order.status == "delivered" %}
+      <span class="tag tag--ok">{{ order.get_status_display }}</span>
+    {% elif order.status == "cancelled" %}
+      <span class="tag tag--bad">{{ order.get_status_display }}</span>
+    {% else %}
+      <span class="tag tag--warn">{{ order.get_status_display }}</span>
+    {% endif %}
+  </div>
+  <p>Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
+
+  <section class="form-card form-card--wide">
+    <h2>Delivery contact</h2>
+    {% if order.delivery_boy_name %}
+      <p>
+        Your order will be delivered by <strong>{{ order.delivery_boy_name }}</strong>{% if order.delivery_boy_mobile %},
+        phone <strong>{{ order.delivery_boy_mobile }}</strong>{% endif %}.
+      </p>
+    {% else %}
+      <p>The delivery person's details will appear here once your order is on its way.</p>
+    {% endif %}
+  </section>
+
+  <table class="cart">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order.items.all %}
+        <tr>
+          <td>{{ item.product_name }}</td>
+          <td>₹{{ item.price|floatformat:"0g" }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ item.line_total|floatformat:"0g" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Subtotal</td>
+        <td>₹{{ order.subtotal|floatformat:"0g" }}</td>
+      </tr>
+      <tr>
+        <td colspan="3">Delivery</td>
+        <td>{% if order.delivery_charge %}₹{{ order.delivery_charge|floatformat:"0g" }}{% else %}Free{% endif %}</td>
+      </tr>
+      <tr>
+        <th colspan="3">Total to pay</th>
+        <th>₹{{ order.total|floatformat:"0g" }}</th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <div class="info-grid">
+    <section class="form-card form-card--wide">
+      <h2>Delivery address</h2>
+      <p>
+        <strong>{{ order.full_name }}</strong><br>
+        {{ order.line1 }}{% if order.line2 %}, {{ order.line2 }}{% endif %}<br>
+        {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
+        Mobile: {{ order.mobile }}
+      </p>
+    </section>
+
+    <section class="form-card form-card--wide">
+      <h2>Payment</h2>
+      <p>{{ order.get_payment_method_display }}</p>
+    </section>
+  </div>
+
+  <p><a href="{% url 'store:home' %}">&larr; Continue shopping</a></p>
+{% endblock %}

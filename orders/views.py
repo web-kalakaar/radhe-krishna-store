@@ -11,7 +11,7 @@ from accounts.models import Profile
 from store.models import Product
 
 from .forms import CheckoutForm, QuantityForm
-from .models import Cart, CartItem
+from .models import Cart, CartItem, Order
 from .services import CheckoutError, delivery_charge_for, place_order
 
 @login_required
@@ -123,7 +123,7 @@ def checkout(request):
 
     if any(item.has_stock_problem for item in items):
         messages.error(request, "Please fix the problems in your cart before checkout.")
-        return redirect("orders:cart")
+        return redirect("orders:order_detail", pk=order.pk)
 
     profile = Profile.objects.filter(user=request.user).first()
     if profile is None:
@@ -166,3 +166,10 @@ def checkout(request):
             "total": subtotal + delivery_charge,
         },
     )
+    
+@login_required
+def order_detail(request, pk):
+    order = get_object_or_404(
+        Order.objects.prefetch_related("items"), pk=pk, user=request.user
+    )
+    return render(request, "orders/order_detail.html", {"order": order})
