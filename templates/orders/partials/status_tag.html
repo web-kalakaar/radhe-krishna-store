@@ -1,0 +1,7 @@
+{% if order.status == "delivered" %}
+  <span class="tag tag--ok">{{ order.get_status_display }}</span>
+{% elif order.status == "cancelled" %}
+  <span class="tag tag--bad">{{ order.get_status_display }}</span>
+{% else %}
+  <span class="tag tag--warn">{{ order.get_status_display }}</span>
+{% endif %}

@@ -771,3 +771,31 @@ a.btn {
 .info-grid .form-card {
   margin: 0;
 }
+
+/* Order list */
+.order-card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.order-card__head,
+.order-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.order-card__date {
+  display: block;
+  font-size: 0.85rem;
+  color: #6b6458;
+}
+
+.order-card__items {
+  margin: 0.75rem 0;
+  padding-left: 1.1rem;
+}

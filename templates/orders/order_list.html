@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}My orders{% endblock %}
+
+{% block content %}
+  <h1>My orders</h1>
+
+  {% for order in page_obj %}
+    <article class="order-card">
+      <div class="order-card__head">
+        <div>
+          <strong>Order {{ order.order_number }}</strong>
+          <span class="order-card__date">{{ order.created_at|date:"d M Y, h:i A" }}</span>
+        </div>
+        {% include "orders/partials/status_tag.html" %}
+      </div>
+
+      <ul class="order-card__items">
+        {% for item in order.items.all|slice:":3" %}
+          <li>{{ item.product_name }} &times; {{ item.quantity }}</li>
+        {% endfor %}
+        {% if order.items.all|length > 3 %}
+          <li>and {{ order.items.all|length|add:"-3" }} more</li>
+        {% endif %}
+      </ul>
+
+      <div class="order-card__foot">
+        <span>Total: <strong>₹{{ order.total|floatformat:"0g" }}</strong></span>
+        <a href="{% url 'orders:order_detail' order.pk %}">View details</a>
+      </div>
+    </article>
+  {% empty %}
+    <p>You haven't placed any orders yet.</p>
+    <p><a class="btn" href="{% url 'store:home' %}">Start shopping</a></p>
+  {% endfor %}
+
+  {% include "partials/pagination.html" %}
+{% endblock %}

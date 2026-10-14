@@ -9,13 +9,7 @@
 
   <div class="order-head">
     <h1>Order {{ order.order_number }}</h1>
-    {% if order.status == "delivered" %}
-      <span class="tag tag--ok">{{ order.get_status_display }}</span>
-    {% elif order.status == "cancelled" %}
-      <span class="tag tag--bad">{{ order.get_status_display }}</span>
-    {% else %}
-      <span class="tag tag--warn">{{ order.get_status_display }}</span>
-    {% endif %}
+        {% include "orders/partials/status_tag.html" %}
   </div>
   <p>Placed on {{ order.created_at|date:"d M Y, h:i A" }}</p>
 

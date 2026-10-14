@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import Profile
 from store.models import Product
-
+from store.utils import paginate
 from .forms import CheckoutForm, QuantityForm
 from .models import Cart, CartItem, Order
 from .services import CheckoutError, delivery_charge_for, place_order
@@ -173,3 +173,13 @@ def order_detail(request, pk):
         Order.objects.prefetch_related("items"), pk=pk, user=request.user
     )
     return render(request, "orders/order_detail.html", {"order": order})
+
+@login_required
+def order_list(request):
+    orders = Order.objects.filter(user=request.user).prefetch_related("items")
+    page_obj, querystring = paginate(request, orders, per_page=10)
+    return render(
+        request,
+        "orders/order_list.html",
+        {"page_obj": page_obj, "querystring": querystring},
+    )
