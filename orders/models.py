@@ -52,3 +52,7 @@ class CartItem(models.Model):
     @property
     def line_total(self):
         return self.product.price * self.quantity
+    @property
+    def has_stock_problem(self):
+        """True if the product is hidden, sold out, or the cart holds more than the stock."""
+        return not self.product.in_stock or self.quantity > self.product.stock

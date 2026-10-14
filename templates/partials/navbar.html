@@ -11,8 +11,8 @@
     <nav class="nav">
       <a href="{% url 'store:home' %}">Home</a>
       {% if user.is_authenticated %}
-              <span class="nav__cart">Cart <span class="cart-count">{{ cart_count }}</span></span>
-      <a href="{% url 'accounts:profile' %}">Hi, {{ user.username }}</a>
+      <a href="{% url 'orders:cart' %}" class="nav__cart">Cart <span class="cart-count">{{ cart_count }}</span></a> <a
+        href="{% url 'accounts:profile' %}">Hi, {{ user.username }}</a>
       <form method="post" action="{% url 'accounts:logout' %}" class="nav__form">
         {% csrf_token %}
         <button type="submit" class="link-button">Log out</button>
