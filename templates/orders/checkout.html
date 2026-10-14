@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+  <h1>Checkout</h1>
+
+  <form method="post" class="checkout">
+    {% csrf_token %}
+
+    <div>
+      <section class="form-card">
+        <h2>Delivery address</h2>
+        {% for error in form.address.errors %}
+          <p class="form-error">{{ error }}</p>
+        {% endfor %}
+        {% for radio in form.address %}
+          <label class="choice">{{ radio.tag }} <span>{{ radio.choice_label }}</span></label>
+        {% endfor %}
+        <p><a href="{% url 'accounts:address_add' %}">Add a new address</a></p>
+      </section>
+
+      <section class="form-card">
+        <h2>Contact number</h2>
+        <p>{{ profile.mobile }} <a href="{% url 'accounts:profile' %}">Change</a></p>
+        <p class="help">The delivery person will call this number.</p>
+      </section>
+
+      <section class="form-card">
+        <h2>Payment</h2>
+        <p>Cash on Delivery. Pay when your order arrives.</p>
+      </section>
+    </div>
+
+    <aside class="form-card">
+      <h2>Order summary</h2>
+      <table class="summary">
+        {% for item in items %}
+          <tr>
+            <td>{{ item.product.name }} &times; {{ item.quantity }}</td>
+            <td>₹{{ item.line_total|floatformat:"0g" }}</td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td>Subtotal</td>
+          <td>₹{{ subtotal|floatformat:"0g" }}</td>
+        </tr>
+        <tr>
+          <td>Delivery</td>
+          <td>{% if delivery_charge %}₹{{ delivery_charge|floatformat:"0g" }}{% else %}Free{% endif %}</td>
+        </tr>
+        <tr class="summary__total">
+          <td>Total to pay</td>
+          <td>₹{{ total|floatformat:"0g" }}</td>
+        </tr>
+      </table>
+      <button type="submit" class="btn btn--block">Place order</button>
+      <p class="form-note"><a href="{% url 'orders:cart' %}">&larr; Back to cart</a></p>
+    </aside>
+  </form>
+{% endblock %}

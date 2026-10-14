@@ -3,75 +3,88 @@
 {% block title %}My cart{% endblock %}
 
 {% block content %}
-  <h1>My cart</h1>
+<h1>My cart</h1>
 
-  {% if items %}
-    {% if has_problems %}
-      <p class="form-error">
-        Some items in your cart are no longer available in the quantity you chose.
-        Please fix them before checkout.
-      </p>
-    {% endif %}
+{% if items %}
+{% if has_problems %}
+<p class="form-error">
+  Some items in your cart are no longer available in the quantity you chose.
+  Please fix them before checkout.
+</p>
+{% endif %}
 
-    <table class="cart">
-      <thead>
-        <tr>
-          <th>Item</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Total</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-          <tr>
-            <td class="cart__product">
-              {% with image=item.product.main_image %}
-                {% if image %}
-                  <img src="{{ image.image.url }}" alt="">
-                {% endif %}
-              {% endwith %}
-              <div>
-                <a href="{% url 'store:product_detail' item.product.slug %}">{{ item.product.name }}</a>
-                {% if not item.product.is_available %}
-                  <p class="form-error">No longer available. Please remove it.</p>
-                {% elif item.product.stock == 0 %}
-                  <p class="form-error">Out of stock. Please remove it.</p>
-                {% elif item.quantity > item.product.stock %}
-                  <p class="form-error">Only {{ item.product.stock }} left. Please reduce the quantity.</p>
-                {% endif %}
-              </div>
-            </td>
-            <td>₹{{ item.product.price|floatformat:"0g" }}</td>
-            <td>
-              <form method="post" action="{% url 'orders:update_item' item.pk %}" class="qty-form">
-                {% csrf_token %}
-                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99">
-                <button type="submit" class="btn btn--small">Update</button>
-              </form>
-            </td>
-            <td>₹{{ item.line_total|floatformat:"0g" }}</td>
-            <td>
-              <form method="post" action="{% url 'orders:remove_item' item.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="link-button">Remove</button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-      <tfoot>
-        <tr>
-          <th colspan="3">Total</th>
-          <th colspan="2">₹{{ total|floatformat:"0g" }}</th>
-        </tr>
-      </tfoot>
-    </table>
+<table class="cart">
+  <thead>
+    <tr>
+      <th>Item</th>
+      <th>Price</th>
+      <th>Quantity</th>
+      <th>Total</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td class="cart__product">
+        {% with image=item.product.main_image %}
+        {% if image %}
+        <img src="{{ image.image.url }}" alt="">
+        {% endif %}
+        {% endwith %}
 
-    <p><a href="{% url 'store:home' %}">&larr; Continue shopping</a></p>
-  {% else %}
-    <p>Your cart is empty.</p>
-    <p><a class="btn" href="{% url 'store:home' %}">Start shopping</a></p>
-  {% endif %}
+        <div>
+          <a href="{% url 'store:product_detail' item.product.slug %}">{{ item.product.name }}</a>
+
+          {% if not item.product.is_available %}
+          <p class="form-error">No longer available. Please remove it.</p>
+          {% elif item.product.stock == 0 %}
+          <p class="form-error">Out of stock. Please remove it.</p>
+          {% elif item.quantity > item.product.stock %}
+          <p class="form-error">Only {{ item.product.stock }} left. Please reduce the quantity.</p>
+          {% endif %}
+        </div>
+      </td>
+
+      <td>₹{{ item.product.price|floatformat:"0g" }}</td>
+
+      <td>
+        <form method="post" action="{% url 'orders:update_item' item.pk %}" class="qty-form">
+          {% csrf_token %}
+          <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="99">
+          <button type="submit" class="btn btn--small">Update</button>
+        </form>
+      </td>
+
+      <td>₹{{ item.line_total|floatformat:"0g" }}</td>
+
+      <td>
+        <form method="post" action="{% url 'orders:remove_item' item.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="link-button">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+
+  <tfoot>
+    <tr>
+      <th colspan="3">Total</th>
+      <th colspan="2">₹{{ total|floatformat:"0g" }}</th>
+    </tr>
+  </tfoot>
+</table>
+
+<p><a href="{% url 'store:home' %}">&larr; Continue shopping</a></p>
+
+{% if not has_problems %}
+<p><a class="btn btn--large" href="{% url 'orders:checkout' %}">Proceed to checkout</a></p>
+{% endif %}
+
+{% else %}
+<p>Your cart is empty.</p>
+<p><a class="btn" href="{% url 'store:home' %}">Start shopping</a></p>
+{% endif %}
+
 {% endblock %}

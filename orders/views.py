@@ -1,16 +1,18 @@
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
+from accounts.models import Profile
 from store.models import Product
 
-from .forms import QuantityForm
+from .forms import CheckoutForm, QuantityForm
 from .models import Cart, CartItem
-
+from .services import CheckoutError, delivery_charge_for, place_order
 
 @login_required
 def cart_detail(request):
@@ -105,3 +107,62 @@ def remove_cart_item(request, item_id):
     item.delete()
     messages.success(request, f"{name} removed from your cart.")
     return redirect("orders:cart")
+
+@login_required
+def checkout(request):
+    cart = Cart.objects.filter(user=request.user).first()
+    items = []
+    if cart:
+        items = list(
+            cart.items.select_related("product").prefetch_related("product__images")
+        )
+
+    if not items:
+        messages.info(request, "Your cart is empty.")
+        return redirect("orders:cart")
+
+    if any(item.has_stock_problem for item in items):
+        messages.error(request, "Please fix the problems in your cart before checkout.")
+        return redirect("orders:cart")
+
+    profile = Profile.objects.filter(user=request.user).first()
+    if profile is None:
+        messages.warning(request, "Please add your mobile number before placing an order.")
+        return redirect("accounts:profile")
+
+    if settings.REQUIRE_MOBILE_VERIFICATION and not profile.is_mobile_verified:
+        messages.warning(request, "Please verify your mobile number before placing an order.")
+        return redirect("accounts:profile")
+
+    if not request.user.addresses.exists():
+        messages.info(request, "Add a delivery address to continue.")
+        return redirect("accounts:address_add")
+
+    if request.method == "POST":
+        form = CheckoutForm(request.POST, user=request.user)
+        if form.is_valid():
+            try:
+                order = place_order(request.user, form.cleaned_data["address"])
+            except CheckoutError as error:
+                messages.error(request, str(error))
+                return redirect("orders:cart")
+            messages.success(request, f"Order {order.order_number} placed successfully!")
+            return redirect("orders:cart")  # replaced by a confirmation page next step
+    else:
+        form = CheckoutForm(user=request.user)
+
+    subtotal = sum((item.line_total for item in items), Decimal("0"))
+    delivery_charge = delivery_charge_for(subtotal)
+
+    return render(
+        request,
+        "orders/checkout.html",
+        {
+            "form": form,
+            "items": items,
+            "profile": profile,
+            "subtotal": subtotal,
+            "delivery_charge": delivery_charge,
+            "total": subtotal + delivery_charge,
+        },
+    )
