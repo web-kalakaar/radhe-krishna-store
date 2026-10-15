@@ -2,7 +2,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
+from django.conf import settings
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -106,3 +106,38 @@ class ProductFeature(models.Model):
 
     def __str__(self):
         return f"{self.name}: {self.value}"
+    
+class StockLog(models.Model):
+    class Reason(models.TextChoices):
+        ONLINE_ORDER = "online_order", "Online order"
+        ORDER_CANCELLED = "order_cancelled", "Order cancelled"
+        OFFLINE_SALE = "offline_sale", "Sold offline"
+        RESTOCK = "restock", "Restocked"
+        CORRECTION = "correction", "Stock count correction"
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="stock_logs"
+    )
+    change = models.IntegerField(help_text="Positive adds stock, negative removes it.")
+    stock_after = models.PositiveIntegerField()
+    reason = models.CharField(max_length=20, choices=Reason.choices)
+    note = models.CharField(max_length=200, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(change=0), name="stocklog_change_not_zero"
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.product}: {self.change:+d} ({self.get_reason_display()})"
