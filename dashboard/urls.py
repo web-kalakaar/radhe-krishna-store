@@ -10,7 +10,10 @@ urlpatterns = [
     path("orders/<int:pk>/", views.order_detail, name="order_detail"),
     path("orders/<int:pk>/deliver/", views.order_deliver, name="order_deliver"),
     path("orders/<int:pk>/cancel/", views.order_cancel, name="order_cancel"),
-        path("stock/", views.stock_list, name="stock_list"),
+    path("stock/", views.stock_list, name="stock_list"),
     path("stock/<int:pk>/adjust/", views.stock_adjust, name="stock_adjust"),
-        path("stock/history/", views.stock_history, name="stock_history"),
+    path("stock/history/", views.stock_history, name="stock_history"),
+    path("products/", views.product_list, name="product_list"),
+    path("products/add/", views.product_create, name="product_create"),
+    path("products/<int:pk>/edit/", views.product_edit, name="product_edit"),
 ]

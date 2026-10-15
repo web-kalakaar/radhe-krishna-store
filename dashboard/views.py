@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -7,13 +8,12 @@ from django.views.decorators.http import require_POST
 
 from orders.models import Order
 from orders.services import CheckoutError, cancel_order, mark_delivered
-from store.models import Product, StockLog
+from store.models import Category, Product, StockLog
 from store.stock import StockError, adjust_stock, set_stock
 from store.utils import paginate
 
 from .decorators import staff_required
-from .forms import DeliveryForm, StockAdjustForm
-
+from .forms import DeliveryForm, ProductForm, StockAdjustForm
 
 LOW_STOCK_LIMIT = 5
 
@@ -39,6 +39,8 @@ def overview(request):
             )[:10],
         },
     )
+
+
 @staff_required
 def order_list(request):
     orders = Order.objects.prefetch_related("items")
@@ -69,7 +71,8 @@ def order_detail(request, pk):
     if request.method == "POST":
         if order.status != Order.Status.PLACED:
             messages.error(
-                request, "Delivery details can only be changed while the order is placed."
+                request,
+                "Delivery details can only be changed while the order is placed.",
             )
             return redirect("dashboard:order_detail", pk=order.pk)
 
@@ -187,9 +190,7 @@ def stock_adjust(request, pk):
             )
         else:
             new_stock = set_stock(product.pk, quantity, note, request.user)
-            messages.success(
-                request, f"Stock of {product.name} is now {new_stock}."
-            )
+            messages.success(request, f"Stock of {product.name} is now {new_stock}.")
     except StockError:
         messages.error(
             request,
@@ -198,6 +199,7 @@ def stock_adjust(request, pk):
         )
 
     return redirect(next_url)
+
 
 @staff_required
 def stock_history(request):
@@ -224,4 +226,89 @@ def stock_history(request):
             "reason": reason,
             "reasons": StockLog.Reason.choices,
         },
+    )
+
+
+@staff_required
+def product_list(request):
+    products = Product.objects.select_related("category")
+
+    query = request.GET.get("q", "").strip()[:100]
+    for word in query.split():
+        products = products.filter(Q(name__icontains=word) | Q(brand__icontains=word))
+
+    category_id = request.GET.get("category", "")
+    if category_id.isdigit():
+        products = products.filter(category_id=category_id)
+    else:
+        category_id = ""
+
+    availability = request.GET.get("availability", "")
+    if availability == "available":
+        products = products.filter(is_available=True)
+    elif availability == "hidden":
+        products = products.filter(is_available=False)
+    else:
+        availability = ""
+
+    page_obj, querystring = paginate(request, products, per_page=20)
+    return render(
+        request,
+        "dashboard/product_list.html",
+        {
+            "page_obj": page_obj,
+            "querystring": querystring,
+            "query": query,
+            "category_id": category_id,
+            "availability": availability,
+            "categories": Category.objects.all(),
+        },
+    )
+
+
+@staff_required
+def product_create(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                product = form.save()
+                if product.stock:
+                    StockLog.objects.create(
+                        product=product,
+                        change=product.stock,
+                        stock_after=product.stock,
+                        reason=StockLog.Reason.RESTOCK,
+                        note="Initial stock",
+                        created_by=request.user,
+                    )
+            messages.success(request, f"{product.name} has been added.")
+            return redirect("dashboard:product_list")
+    else:
+        form = ProductForm()
+
+    return render(
+        request,
+        "dashboard/product_form.html",
+        {"form": form, "title": "Add product", "product": None},
+    )
+
+
+@staff_required
+def product_edit(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            product = form.save()
+            messages.success(request, f"{product.name} has been updated.")
+            return redirect("dashboard:product_list")
+    else:
+        form = ProductForm(instance=product)
+
+    return render(
+        request,
+        "dashboard/product_form.html",
+        {"form": form, "title": "Edit product", "product": product},
     )

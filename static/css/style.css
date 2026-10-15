@@ -939,3 +939,11 @@ a.btn {
   font-weight: 700;
   color: #c62828;
 }
+.form-narrow {
+  max-width: 640px;
+}
+
+.order-head .btn {
+  margin-left: auto;
+  text-decoration: none;
+}

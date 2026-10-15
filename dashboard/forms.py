@@ -1,6 +1,8 @@
 from django import forms
 
 from orders.models import Order
+from store.models import Product
+ 
 
 
 class DeliveryForm(forms.ModelForm):
@@ -41,3 +43,36 @@ class StockAdjustForm(forms.Form):
         ):
             self.add_error("quantity", "Enter a quantity of at least 1.")
         return cleaned_data
+    
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = [
+            "category",
+            "name",
+            "brand",
+            "description",
+            "mrp",
+            "discount_percent",
+            "stock",
+            "is_available",
+            "is_featured",
+        ]
+        labels = {
+            "is_available": "Available in the shop",
+            "is_featured": "Show on the home page (featured)",
+        }
+        widgets = {"description": forms.Textarea(attrs={"rows": 5})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            # After creation, stock changes only through the stock page,
+            # so that every change is recorded in the history.
+            del self.fields["stock"]
+
+    def clean_mrp(self):
+        mrp = self.cleaned_data["mrp"]
+        if mrp <= 0:
+            raise forms.ValidationError("MRP must be more than 0.")
+        return mrp

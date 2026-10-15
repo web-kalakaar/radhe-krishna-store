@@ -1,0 +1,31 @@
+{% extends "dashboard/base_owner.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <p><a href="{% url 'dashboard:product_list' %}">&larr; All products</a></p>
+  <h1>{{ title }}</h1>
+
+  <section class="form-card form-card--wide form-narrow">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% include "partials/form_fields.html" %}
+
+      {% if product %}
+        <p class="help">
+          Selling price: <strong>₹{{ product.price|floatformat:"0g" }}</strong> (calculated from MRP and discount when you save).<br>
+          Stock: <strong>{{ product.stock }}</strong>. Change it on the
+          <a href="{% url 'dashboard:stock_list' %}?q={{ product.name|urlencode }}">Stock page</a>.
+        </p>
+      {% else %}
+        <p class="help">
+          The selling price is calculated from the MRP and the discount.
+          The web address of the product is made from its name.
+        </p>
+      {% endif %}
+
+      <button type="submit" class="btn">Save product</button>
+      <a href="{% url 'dashboard:product_list' %}">Cancel</a>
+    </form>
+  </section>
+{% endblock %}
