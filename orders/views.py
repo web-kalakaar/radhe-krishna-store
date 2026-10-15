@@ -12,7 +12,7 @@ from store.models import Product
 from store.utils import paginate
 from .forms import CheckoutForm, QuantityForm
 from .models import Cart, CartItem, Order
-from .services import CheckoutError, delivery_charge_for, place_order
+from .services import CheckoutError, cancel_order, delivery_charge_for, place_order
 
 @login_required
 def cart_detail(request):
@@ -183,3 +183,17 @@ def order_list(request):
         "orders/order_list.html",
         {"page_obj": page_obj, "querystring": querystring},
     )
+    
+@login_required
+@require_POST
+def cancel_order_view(request, pk):
+    order = get_object_or_404(Order, pk=pk, user=request.user)
+
+    try:
+        cancel_order(order)
+    except CheckoutError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(request, f"Order {order.order_number} has been cancelled.")
+
+    return redirect("orders:order_detail", pk=order.pk)

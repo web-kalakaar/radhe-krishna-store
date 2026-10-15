@@ -76,6 +76,12 @@
       <p>{{ order.get_payment_method_display }}</p>
     </section>
   </div>
-
+  {% if order.is_cancellable %}
+    <form method="post" action="{% url 'orders:cancel_order' order.pk %}"
+          onsubmit="return confirm('Cancel this order?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn--danger">Cancel order</button>
+    </form>
+  {% endif %}
   <p><a href="{% url 'store:home' %}">&larr; Continue shopping</a></p>
 {% endblock %}

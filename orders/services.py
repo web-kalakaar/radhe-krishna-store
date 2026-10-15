@@ -65,3 +65,19 @@ def place_order(user, address):
 
     cart.items.all().delete()
     return order
+@transaction.atomic
+def cancel_order(order):
+    """Cancel a placed order and return its items to stock."""
+    # Change the status only if the order is still "placed". Doing this in one
+    # database step means two clicks (or two tabs) can never restore stock twice.
+    changed = Order.objects.filter(pk=order.pk, status=Order.Status.PLACED).update(
+        status=Order.Status.CANCELLED
+    )
+    if not changed:
+        raise CheckoutError("This order can no longer be cancelled.")
+
+    for item in order.items.all():
+        if item.product_id:
+            Product.objects.filter(pk=item.product_id).update(
+                stock=F("stock") + item.quantity
+            )
