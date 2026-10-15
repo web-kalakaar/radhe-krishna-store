@@ -1,12 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}Owner panel{% endblock %} | Radhe Krishna Store</title>
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
+
 <body>
   <header class="site-header">
     <div class="container site-header__inner">
@@ -26,7 +28,8 @@
 
   <div class="container dash">
     <aside class="dash__menu">
-            <a href="{% url 'dashboard:stock_list' %}">Stock</a>
+      <a href="{% url 'dashboard:stock_list' %}">Stock</a>
+      <a href="{% url 'dashboard:stock_history' %}">Stock history</a>
       <a href="{% url 'dashboard:overview' %}">Overview</a>
     </aside>
     <div class="dash__main">
@@ -34,4 +37,5 @@
     </div>
   </div>
 </body>
+
 </html>

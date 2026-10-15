@@ -198,3 +198,30 @@ def stock_adjust(request, pk):
         )
 
     return redirect(next_url)
+
+@staff_required
+def stock_history(request):
+    logs = StockLog.objects.select_related("product", "created_by")
+
+    query = request.GET.get("q", "").strip()[:100]
+    for word in query.split():
+        logs = logs.filter(Q(product__name__icontains=word) | Q(note__icontains=word))
+
+    reason = request.GET.get("reason", "")
+    if reason in StockLog.Reason.values:
+        logs = logs.filter(reason=reason)
+    else:
+        reason = ""
+
+    page_obj, querystring = paginate(request, logs, per_page=25)
+    return render(
+        request,
+        "dashboard/stock_history.html",
+        {
+            "page_obj": page_obj,
+            "querystring": querystring,
+            "query": query,
+            "reason": reason,
+            "reasons": StockLog.Reason.choices,
+        },
+    )

@@ -930,3 +930,12 @@ a.btn {
 .stock-form input[type="text"] {
   width: 170px;
 }
+.change--plus {
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.change--minus {
+  font-weight: 700;
+  color: #c62828;
+}
