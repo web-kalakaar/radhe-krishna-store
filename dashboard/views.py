@@ -1,14 +1,19 @@
 from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from orders.models import Order
 from orders.services import CheckoutError, cancel_order, mark_delivered
-from store.models import Product
+from store.models import Product, StockLog
+from store.stock import StockError, adjust_stock, set_stock
 from store.utils import paginate
 
 from .decorators import staff_required
-from .forms import DeliveryForm
+from .forms import DeliveryForm, StockAdjustForm
+
 
 LOW_STOCK_LIMIT = 5
 
@@ -108,3 +113,88 @@ def order_cancel(request, pk):
             f"Order {order.order_number} cancelled. The items are back in stock.",
         )
     return redirect("dashboard:order_detail", pk=order.pk)
+
+
+@staff_required
+def stock_list(request):
+    products = Product.objects.select_related("category").order_by("name", "id")
+
+    query = request.GET.get("q", "").strip()[:100]
+    for word in query.split():
+        products = products.filter(Q(name__icontains=word) | Q(brand__icontains=word))
+
+    stock_filter = request.GET.get("filter", "")
+    if stock_filter == "low":
+        products = products.filter(stock__gt=0, stock__lte=LOW_STOCK_LIMIT)
+    elif stock_filter == "out":
+        products = products.filter(stock=0)
+    else:
+        stock_filter = ""
+
+    page_obj, querystring = paginate(request, products, per_page=20)
+    return render(
+        request,
+        "dashboard/stock_list.html",
+        {
+            "page_obj": page_obj,
+            "querystring": querystring,
+            "query": query,
+            "stock_filter": stock_filter,
+            "low_stock_limit": LOW_STOCK_LIMIT,
+            "action_choices": StockAdjustForm.ACTION_CHOICES,
+        },
+    )
+
+
+@staff_required
+@require_POST
+def stock_adjust(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    form = StockAdjustForm(request.POST)
+
+    next_url = request.POST.get("next", "")
+    if not url_has_allowed_host_and_scheme(
+        next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        next_url = reverse("dashboard:stock_list")
+
+    if not form.is_valid():
+        for errors in form.errors.values():
+            for error in errors:
+                messages.error(request, error)
+        return redirect(next_url)
+
+    action = form.cleaned_data["action"]
+    quantity = form.cleaned_data["quantity"]
+    note = form.cleaned_data["note"]
+
+    try:
+        if action == "sold":
+            new_stock = adjust_stock(
+                product.pk, -quantity, StockLog.Reason.OFFLINE_SALE, note, request.user
+            )
+            messages.success(
+                request,
+                f"Recorded {quantity} sold offline: {product.name}. Stock is now {new_stock}.",
+            )
+        elif action == "restock":
+            new_stock = adjust_stock(
+                product.pk, quantity, StockLog.Reason.RESTOCK, note, request.user
+            )
+            messages.success(
+                request,
+                f"Added {quantity} to {product.name}. Stock is now {new_stock}.",
+            )
+        else:
+            new_stock = set_stock(product.pk, quantity, note, request.user)
+            messages.success(
+                request, f"Stock of {product.name} is now {new_stock}."
+            )
+    except StockError:
+        messages.error(
+            request,
+            f"Cannot subtract {quantity} from {product.name}: "
+            "there is not enough stock.",
+        )
+
+    return redirect(next_url)

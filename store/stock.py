@@ -34,3 +34,14 @@ def adjust_stock(product_id, delta, reason, note="", user=None):
         created_by=user,
     )
     return new_stock
+
+@transaction.atomic
+def set_stock(product_id, count, note="", user=None):
+    """Set a product's stock to an exact count (a stock count correction)."""
+    # select_for_update locks the row on databases that support it (PostgreSQL),
+    # so the difference we calculate can't be out of date.
+    product = Product.objects.select_for_update().get(pk=product_id)
+    delta = count - product.stock
+    if delta == 0:
+        return product.stock
+    return adjust_stock(product_id, delta, StockLog.Reason.CORRECTION, note, user)

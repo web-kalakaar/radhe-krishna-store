@@ -1,0 +1,70 @@
+{% extends "dashboard/base_owner.html" %}
+
+{% block title %}Stock{% endblock %}
+
+{% block content %}
+  <h1>Stock</h1>
+
+  <form method="get" class="filters">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search product or brand" maxlength="100">
+    <select name="filter">
+      <option value="">All products</option>
+      <option value="low" {% if stock_filter == "low" %}selected{% endif %}>Low stock (1 to {{ low_stock_limit }})</option>
+      <option value="out" {% if stock_filter == "out" %}selected{% endif %}>Out of stock</option>
+    </select>
+    <button type="submit" class="btn">Filter</button>
+    <a href="{% url 'dashboard:stock_list' %}">Clear</a>
+  </form>
+
+  {% if page_obj %}
+    <table class="cart">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>In stock</th>
+          <th>Record a change</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in page_obj %}
+          <tr>
+            <td>
+              {{ product.name }}
+              {% if not product.is_available %}<span class="tag">Hidden</span>{% endif %}
+              <br><span class="help">{{ product.category.name }}</span>
+            </td>
+            <td>
+              {% if product.stock == 0 %}
+                <span class="tag tag--bad">0</span>
+              {% elif product.stock <= low_stock_limit %}
+                <span class="tag tag--warn">{{ product.stock }}</span>
+              {% else %}
+                {{ product.stock }}
+              {% endif %}
+            </td>
+            <td>
+              <form method="post" action="{% url 'dashboard:stock_adjust' product.pk %}" class="stock-form">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <select name="action" aria-label="Type of change">
+                  {% for value, label in action_choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+                <input type="number" name="quantity" min="0" max="100000" required
+                       placeholder="Qty" aria-label="Quantity">
+                <input type="text" name="note" maxlength="200"
+                       placeholder="Note (optional)" aria-label="Note">
+                <button type="submit" class="btn btn--small">Save</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No products found.</p>
+  {% endif %}
+
+  {% include "partials/pagination.html" %}
+{% endblock %}

@@ -67,8 +67,7 @@
         {{ product.stock }}
         {% endif %}
       </td>
-      <td><a href="{% url 'admin:store_product_change' product.pk %}">Edit</a></td>
-    </tr>
+            <td><a href="{% url 'dashboard:stock_list' %}?q={{ product.name|urlencode }}">Update stock</a></td>    </tr>
     {% endfor %}
   </tbody>
 </table>

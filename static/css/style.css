@@ -905,3 +905,28 @@ a.btn {
 .actions form {
   margin: 0;
 }
+
+/* Owner stock page */
+.stock-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.stock-form select,
+.stock-form input[type="number"],
+.stock-form input[type="text"],
+.filters input[type="search"] {
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.stock-form input[type="number"] {
+  width: 80px;
+}
+
+.stock-form input[type="text"] {
+  width: 170px;
+}
