@@ -1,0 +1,82 @@
+{% extends "dashboard/base_owner.html" %}
+
+{% block title %}Order {{ order.order_number }}{% endblock %}
+
+{% block content %}
+  <p><a href="{% url 'dashboard:order_list' %}">&larr; All orders</a></p>
+
+  <div class="order-head">
+    <h1>Order {{ order.order_number }}</h1>
+    {% include "orders/partials/status_tag.html" %}
+  </div>
+  <p>Placed on {{ order.created_at|date:"d M Y, h:i A" }} &middot; {{ order.get_payment_method_display }}</p>
+
+  <div class="info-grid">
+    <section class="form-card form-card--wide">
+      <h2>Customer and delivery address</h2>
+      <p>
+        <strong>{{ order.full_name }}</strong><br>
+        {{ order.line1 }}{% if order.line2 %}, {{ order.line2 }}{% endif %}<br>
+        {{ order.city }}, {{ order.state }} - {{ order.pincode }}<br>
+        Mobile: <a href="tel:{{ order.mobile }}">{{ order.mobile }}</a>
+      </p>
+    </section>
+
+    <section class="form-card form-card--wide">
+      <h2>Delivery person</h2>
+      {% if order.status == "placed" %}
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% include "partials/form_fields.html" %}
+          <button type="submit" class="btn">Save</button>
+        </form>
+      {% elif order.delivery_boy_name %}
+        <p>{{ order.delivery_boy_name }}{% if order.delivery_boy_mobile %}, {{ order.delivery_boy_mobile }}{% endif %}</p>
+      {% else %}
+        <p>None entered.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <table class="cart">
+    <thead>
+      <tr><th>Item</th><th>Price</th><th>Quantity</th><th>Total</th></tr>
+    </thead>
+    <tbody>
+      {% for item in order.items.all %}
+        <tr>
+          <td>{{ item.product_name }}</td>
+          <td>₹{{ item.price|floatformat:"0g" }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>₹{{ item.line_total|floatformat:"0g" }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3">Delivery</td>
+        <td>{% if order.delivery_charge %}₹{{ order.delivery_charge|floatformat:"0g" }}{% else %}Free{% endif %}</td>
+      </tr>
+      <tr>
+        <th colspan="3">Total to collect</th>
+        <th>₹{{ order.total|floatformat:"0g" }}</th>
+      </tr>
+    </tfoot>
+  </table>
+
+  {% if order.is_cancellable %}
+    <div class="actions">
+      <form method="post" action="{% url 'dashboard:order_deliver' order.pk %}"
+            onsubmit="return confirm('Mark this order as delivered?');">
+        {% csrf_token %}
+        <button type="submit" class="btn">Mark as delivered</button>
+      </form>
+
+      <form method="post" action="{% url 'dashboard:order_cancel' order.pk %}"
+            onsubmit="return confirm('Cancel this order? The items will go back into stock.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--danger">Cancel order</button>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}

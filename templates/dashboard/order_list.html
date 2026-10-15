@@ -1,0 +1,47 @@
+{% extends "dashboard/base_owner.html" %}
+
+{% block title %}Orders{% endblock %}
+
+{% block content %}
+  <h1>Orders</h1>
+
+  <nav class="tabs">
+    <a href="{% url 'dashboard:order_list' %}"
+       class="{% if not current_status %}is-active{% endif %}">All</a>
+    {% for value, label in statuses %}
+      <a href="?status={{ value }}"
+         class="{% if current_status == value %}is-active{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if page_obj %}
+    <table class="cart">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Placed</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in page_obj %}
+          <tr>
+            <td><a href="{% url 'dashboard:order_detail' order.pk %}">{{ order.order_number }}</a></td>
+            <td>{{ order.created_at|date:"d M, h:i A" }}</td>
+            <td>{{ order.full_name }}<br><span class="help">{{ order.mobile }}</span></td>
+            <td>{{ order.items.all|length }}</td>
+            <td>₹{{ order.total|floatformat:"0g" }}</td>
+            <td>{% include "orders/partials/status_tag.html" %}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No orders found.</p>
+  {% endif %}
+
+  {% include "partials/pagination.html" %}
+{% endblock %}

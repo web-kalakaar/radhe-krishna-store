@@ -6,4 +6,8 @@ app_name = "dashboard"
 
 urlpatterns = [
     path("", views.overview, name="overview"),
+    path("orders/", views.order_list, name="order_list"),
+    path("orders/<int:pk>/", views.order_detail, name="order_detail"),
+    path("orders/<int:pk>/deliver/", views.order_deliver, name="order_deliver"),
+    path("orders/<int:pk>/cancel/", views.order_cancel, name="order_cancel"),
 ]

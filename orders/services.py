@@ -81,3 +81,12 @@ def cancel_order(order):
             Product.objects.filter(pk=item.product_id).update(
                 stock=F("stock") + item.quantity
             )
+
+@transaction.atomic
+def mark_delivered(order):
+    """Mark a placed order as delivered."""
+    changed = Order.objects.filter(pk=order.pk, status=Order.Status.PLACED).update(
+        status=Order.Status.DELIVERED
+    )
+    if not changed:
+        raise CheckoutError("Only an order that is still placed can be marked as delivered.")
