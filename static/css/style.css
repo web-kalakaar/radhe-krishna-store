@@ -799,3 +799,76 @@ a.btn {
   margin: 0.75rem 0;
   padding-left: 1.1rem;
 }
+/* Owner dashboard */
+.dash {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+@media (min-width: 800px) {
+  .dash {
+    grid-template-columns: 200px 1fr;
+    align-items: start;
+  }
+}
+
+.dash__menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+@media (min-width: 800px) {
+  .dash__menu {
+    flex-direction: column;
+  }
+}
+
+.dash__menu a {
+  padding: 0.5rem 0.75rem;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.dash__menu a:hover {
+  background: var(--color-bg);
+  color: var(--color-primary);
+}
+
+.dash__main h1,
+.dash__main h2 {
+  margin-top: 0;
+}
+
+.dash__main h2 {
+  margin-top: 2rem;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.stat__number {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}

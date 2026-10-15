@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Owner panel{% endblock %} | Radhe Krishna Store</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="{% url 'dashboard:overview' %}">Owner panel</a>
+      <nav class="nav">
+        <a href="{% url 'store:home' %}">View shop</a>
+        <a href="{% url 'admin:index' %}">Django admin</a>
+        <form method="post" action="{% url 'accounts:logout' %}" class="nav__form">
+          {% csrf_token %}
+          <button type="submit" class="link-button">Log out</button>
+        </form>
+      </nav>
+    </div>
+  </header>
+
+  {% include "partials/messages.html" %}
+
+  <div class="container dash">
+    <aside class="dash__menu">
+      <a href="{% url 'dashboard:overview' %}">Overview</a>
+    </aside>
+    <div class="dash__main">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

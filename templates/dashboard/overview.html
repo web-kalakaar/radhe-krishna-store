@@ -1,0 +1,69 @@
+{% extends "dashboard/base_owner.html" %}
+
+{% block title %}Overview{% endblock %}
+
+{% block content %}
+  <h1>Overview</h1>
+
+  <div class="stat-grid">
+    <div class="stat">
+      <span class="stat__number">{{ new_orders_count }}</span>
+      <span>New orders</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">{{ low_stock_count }}</span>
+      <span>Low stock (1 to {{ low_stock_limit }} left)</span>
+    </div>
+    <div class="stat">
+      <span class="stat__number">{{ out_of_stock_count }}</span>
+      <span>Out of stock</span>
+    </div>
+  </div>
+
+  <h2>New orders</h2>
+  {% if recent_orders %}
+    <table class="cart">
+      <thead>
+        <tr><th>Order</th><th>Customer</th><th>Placed</th><th>Total</th></tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+          <tr>
+            <td>{{ order.order_number }}</td>
+            <td>{{ order.full_name }}</td>
+            <td>{{ order.created_at|date:"d M, h:i A" }}</td>
+            <td>₹{{ order.total|floatformat:"0g" }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>No new orders right now.</p>
+  {% endif %}
+
+  <h2>Stock needs attention</h2>
+  {% if attention_products %}
+    <table class="cart">
+      <thead>
+        <tr><th>Product</th><th>In stock</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for product in attention_products %}
+          <tr>
+            <td>{{ product.name }}</td>
+            <td>
+              {% if product.stock == 0 %}
+                <span class="tag tag--bad">Out of stock</span>
+              {% else %}
+                {{ product.stock }}
+              {% endif %}
+            </td>
+            <td><a href="{% url 'admin:store_product_change' product.pk %}">Edit</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>All products have enough stock.</p>
+  {% endif %}
+{% endblock %}
