@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Verify mobile number{% endblock %}
+
+{% block content %}
+  <div class="form-card">
+    <h1>Verify your mobile number</h1>
+
+    {% if profile.is_mobile_verified %}
+      <p><span class="tag tag--ok">Verified</span> {{ profile.mobile }}</p>
+      <p><a href="{% url 'accounts:profile' %}">&larr; Back to profile</a></p>
+    {% else %}
+      <p>
+        Your number: <strong>{{ masked_mobile }}</strong>
+        <a href="{% url 'accounts:profile' %}">Change</a>
+      </p>
+
+      <h2>Step 1: Get a code</h2>
+      <form method="post" action="{% url 'accounts:otp_send' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next_url }}">
+        <button type="submit" class="btn">Send code</button>
+      </form>
+
+      <h2>Step 2: Enter the code</h2>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next_url }}">
+        {% include "partials/form_fields.html" %}
+        <button type="submit" class="btn">Verify</button>
+      </form>
+
+      <p class="help">
+        Demo mode: no SMS is sent. The code is shown at the top of this page
+        and printed in the terminal.
+      </p>
+    {% endif %}
+  </div>
+{% endblock %}

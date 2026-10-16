@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db import transaction
 from .models import Address, Profile, mobile_validator
 from .models import Profile, mobile_validator
-
+from django.core.validators import RegexValidator
 User = get_user_model()
 
 
@@ -55,3 +55,15 @@ class AddressForm(forms.ModelForm):
         fields = ["full_name", "line1", "line2", "city", "state", "pincode", "is_default"]
         labels = {"is_default": "Make this my default address"}
         widgets = {"pincode": forms.TextInput(attrs={"inputmode": "numeric"})}
+        
+        
+class OTPForm(forms.Form):
+    code = forms.CharField(
+        label="6-digit code",
+        min_length=6,
+        max_length=6,
+        validators=[RegexValidator(r"^\d{6}$", "Enter the 6-digit code.")],
+        widget=forms.TextInput(
+            attrs={"inputmode": "numeric", "autocomplete": "one-time-code"}
+        ),
+    )

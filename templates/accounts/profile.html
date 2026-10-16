@@ -23,9 +23,10 @@
       <p>
         {% if profile.is_mobile_verified %}
         <span class="tag tag--ok">Verified</span>
-        {% else %}
-        <span class="tag tag--warn">Not verified</span>
-        {% endif %}
+                    {% else %}
+              <span class="tag tag--warn">Not verified</span>
+              <a href="{% url 'accounts:verify_mobile' %}">Verify now</a>
+            {% endif %}
       </p>
       {% endif %}
       <button type="submit" class="btn">Save</button>

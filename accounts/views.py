@@ -1,11 +1,16 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 
-from .forms import AddressForm, ProfileForm, SignupForm
+from .forms import AddressForm, OTPForm, ProfileForm, SignupForm
 from .models import Profile
-
+from .otp import OTPError, issue_otp, verify_otp
 
 def signup(request):
     if request.user.is_authenticated:
@@ -103,3 +108,87 @@ def address_delete(request, pk):
         return redirect("accounts:profile")
 
     return render(request, "accounts/address_confirm_delete.html", {"address": address})
+
+
+def _safe_next(request):
+    """The page to return to after verifying, or "" if it is missing or unsafe."""
+    next_url = request.POST.get("next") or request.GET.get("next", "")
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return next_url
+    return ""
+
+
+def _verify_redirect(next_url):
+    url = reverse("accounts:verify_mobile")
+    if next_url:
+        url += "?" + urlencode({"next": next_url})
+    return redirect(url)
+
+
+@login_required
+def verify_mobile(request):
+    profile = Profile.objects.filter(user=request.user).first()
+    if profile is None:
+        messages.warning(request, "Please add your mobile number first.")
+        return redirect("accounts:profile")
+
+    next_url = _safe_next(request)
+
+    if profile.is_mobile_verified and next_url:
+        return redirect(next_url)
+
+    if request.method == "POST" and not profile.is_mobile_verified:
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            try:
+                verify_otp(request.user, profile.mobile, form.cleaned_data["code"])
+            except OTPError as error:
+                messages.error(request, str(error))
+                return _verify_redirect(next_url)
+            messages.success(request, "Your mobile number is verified.")
+            return redirect(next_url or "accounts:profile")
+    else:
+        form = OTPForm()
+
+    return render(
+        request,
+        "accounts/verify_mobile.html",
+        {
+            "form": form,
+            "profile": profile,
+            "masked_mobile": "******" + profile.mobile[-4:],
+            "next_url": next_url,
+        },
+    )
+
+
+@login_required
+@require_POST
+def otp_send(request):
+    profile = Profile.objects.filter(user=request.user).first()
+    if profile is None:
+        messages.warning(request, "Please add your mobile number first.")
+        return redirect("accounts:profile")
+
+    next_url = _safe_next(request)
+
+    if profile.is_mobile_verified:
+        messages.info(request, "Your mobile number is already verified.")
+        return redirect(next_url or "accounts:profile")
+
+    try:
+        issue_otp(request, request.user, profile.mobile)
+    except OTPError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(
+            request,
+            f"A 6-digit code has been sent to ******{profile.mobile[-4:]}. "
+            "It is valid for 5 minutes.",
+        )
+
+    return _verify_redirect(next_url)
