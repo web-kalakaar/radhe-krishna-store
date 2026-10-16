@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -13,7 +13,7 @@ from store.stock import StockError, adjust_stock, set_stock
 from store.utils import paginate
 
 from .decorators import staff_required
-from .forms import DeliveryForm, ProductForm, StockAdjustForm
+from .forms import DeliveryForm, ProductForm, ProductImageFormSet, StockAdjustForm
 
 LOW_STOCK_LIMIT = 5
 
@@ -229,9 +229,25 @@ def stock_history(request):
     )
 
 
+MIN_PHOTOS = 3
+
+
+def warn_if_few_photos(request, product):
+    count = product.images.count()
+    if count < MIN_PHOTOS:
+        messages.warning(
+            request,
+            f"{product.name} has only {count} photo{'s' if count != 1 else ''}. "
+            f"Products with at least {MIN_PHOTOS} photos look better.",
+        )
+
+
 @staff_required
 def product_list(request):
-    products = Product.objects.select_related("category")
+
+    products = Product.objects.select_related("category").annotate(
+        image_count=Count("images")
+    )
 
     query = request.GET.get("q", "").strip()[:100]
     for word in query.split():
@@ -270,9 +286,15 @@ def product_list(request):
 def product_create(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
-        if form.is_valid():
+        image_formset = ProductImageFormSet(request.POST, request.FILES)
+        form_ok = form.is_valid()
+        photos_ok = image_formset.is_valid()
+
+        if form_ok and photos_ok:
             with transaction.atomic():
                 product = form.save()
+                image_formset.instance = product
+                image_formset.save()
                 if product.stock:
                     StockLog.objects.create(
                         product=product,
@@ -283,14 +305,21 @@ def product_create(request):
                         created_by=request.user,
                     )
             messages.success(request, f"{product.name} has been added.")
+            warn_if_few_photos(request, product)
             return redirect("dashboard:product_list")
     else:
         form = ProductForm()
+        image_formset = ProductImageFormSet()
 
     return render(
         request,
         "dashboard/product_form.html",
-        {"form": form, "title": "Add product", "product": None},
+        {
+            "form": form,
+            "image_formset": image_formset,
+            "title": "Add product",
+            "product": None,
+        },
     )
 
 
@@ -300,15 +329,30 @@ def product_edit(request, pk):
 
     if request.method == "POST":
         form = ProductForm(request.POST, instance=product)
-        if form.is_valid():
-            product = form.save()
+        image_formset = ProductImageFormSet(
+            request.POST, request.FILES, instance=product
+        )
+        form_ok = form.is_valid()
+        photos_ok = image_formset.is_valid()
+
+        if form_ok and photos_ok:
+            with transaction.atomic():
+                product = form.save()
+                image_formset.save()
             messages.success(request, f"{product.name} has been updated.")
+            warn_if_few_photos(request, product)
             return redirect("dashboard:product_list")
     else:
         form = ProductForm(instance=product)
+        image_formset = ProductImageFormSet(instance=product)
 
     return render(
         request,
         "dashboard/product_form.html",
-        {"form": form, "title": "Edit product", "product": product},
+        {
+            "form": form,
+            "image_formset": image_formset,
+            "title": "Edit product",
+            "product": product,
+        },
     )

@@ -1,62 +1,156 @@
+
 {% extends "dashboard/base_owner.html" %}
 
 {% block title %}Products{% endblock %}
 
 {% block content %}
-  <div class="order-head">
-    <h1>Products</h1>
-    <a class="btn" href="{% url 'dashboard:product_create' %}">Add product</a>
-  </div>
+<div class="order-head">
+    <div>
+        <h1>Products</h1>
+        <p class="help">Manage your products, pricing, stock, and visibility.</p>
+    </div>
 
-  <form method="get" class="filters">
-    <input type="search" name="q" value="{{ query }}" placeholder="Search name or brand" maxlength="100">
-    <select name="category">
-      <option value="">All categories</option>
-      {% for category in categories %}
-        <option value="{{ category.pk }}" {% if category_id == category.pk|stringformat:"d" %}selected{% endif %}>{{ category.name }}</option>
-      {% endfor %}
-    </select>
-    <select name="availability">
-      <option value="">Shown and hidden</option>
-      <option value="available" {% if availability == "available" %}selected{% endif %}>Shown in the shop</option>
-      <option value="hidden" {% if availability == "hidden" %}selected{% endif %}>Hidden</option>
-    </select>
-    <button type="submit" class="btn">Filter</button>
-    <a href="{% url 'dashboard:product_list' %}">Clear</a>
-  </form>
+    <a class="btn" href="{% url 'dashboard:product_create' %}">
+        Add product
+    </a>
+</div>
 
-  {% if page_obj %}
-    <table class="cart">
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>MRP</th>
-          <th>Discount</th>
-          <th>Price</th>
-          <th>Stock</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for product in page_obj %}
-          <tr>
-            <td>
-              {{ product.name }}
-              {% if not product.is_available %}<span class="tag">Hidden</span>{% endif %}
-              <br><span class="help">{{ product.category.name }}{% if product.brand %} &middot; {{ product.brand }}{% endif %}</span>
-            </td>
-            <td>₹{{ product.mrp|floatformat:"0g" }}</td>
-            <td>{% if product.discount_percent %}{{ product.discount_percent }}%{% else %}-{% endif %}</td>
-            <td>₹{{ product.price|floatformat:"0g" }}</td>
-            <td>{{ product.stock }}</td>
-            <td><a href="{% url 'dashboard:product_edit' product.pk %}">Edit</a></td>
-          </tr>
+<form method="get" class="filters">
+    <input
+        type="search"
+        name="q"
+        value="{{ query|default:'' }}"
+        placeholder="Search name or brand"
+        maxlength="100"
+        aria-label="Search products"
+    >
+
+    <select name="category" aria-label="Filter by category">
+        <option value="">All categories</option>
+
+        {% for category in categories %}
+            <option
+                value="{{ category.pk }}"
+                {% if category_id == category.pk|stringformat:"d" %}selected{% endif %}
+            >
+                {{ category.name }}
+            </option>
         {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>No products found.</p>
-  {% endif %}
+    </select>
 
-  {% include "partials/pagination.html" %}
+    <select name="availability" aria-label="Filter by availability">
+        <option value="">Shown and hidden</option>
+
+        <option
+            value="available"
+            {% if availability == "available" %}selected{% endif %}
+        >
+            Shown in the shop
+        </option>
+
+        <option
+            value="hidden"
+            {% if availability == "hidden" %}selected{% endif %}
+        >
+            Hidden
+        </option>
+    </select>
+
+    <button type="submit" class="btn">Filter</button>
+
+    <a href="{% url 'dashboard:product_list' %}">Clear filters</a>
+</form>
+
+{% if page_obj %}
+    {% if page_obj.object_list %}
+        <div class="help">
+            {% if page_obj.paginator.count == 1 %}
+                1 product found
+            {% else %}
+                {{ page_obj.paginator.count }} products found
+            {% endif %}
+        </div>
+
+        <table class="cart">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">MRP</th>
+                    <th scope="col">Discount</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Stock</th>
+                    <th scope="col">Photos</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for product in page_obj %}
+                    <tr>
+                        <td>
+                            <strong>{{ product.name }}</strong>
+
+                            {% if not product.is_available %}
+                                <span class="tag">Hidden</span>
+                            {% endif %}
+
+                            <br>
+
+                            <span class="help">
+                                {{ product.category.name }}
+                                {% if product.brand %}
+                                    &middot; {{ product.brand }}
+                                {% endif %}
+                            </span>
+                        </td>
+
+                        <td>
+                            ₹{{ product.mrp|floatformat:"0g" }}
+                        </td>
+
+                        <td>
+                            {% if product.discount_percent %}
+                                {{ product.discount_percent }}%
+                            {% else %}
+                                &mdash;
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <strong>₹{{ product.price|floatformat:"0g" }}</strong>
+                        </td>
+
+                        <td>
+                            {{ product.stock }}
+                        </td>
+
+                        <td>
+                            {% if product.image_count < 3 %}
+                                <span class="tag tag--warn">
+                                    {{ product.image_count }}
+                                </span>
+                            {% else %}
+                                {{ product.image_count }}
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'dashboard:product_edit' product.pk %}">
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No products found matching your filters.</p>
+        <a href="{% url 'dashboard:product_list' %}">Clear filters</a>
+    {% endif %}
+{% else %}
+    <p>No products found.</p>
+{% endif %}
+
+{% include "partials/pagination.html" %}
+
 {% endblock %}

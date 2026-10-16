@@ -1,8 +1,8 @@
 from django import forms
+from django.forms import inlineformset_factory
 
 from orders.models import Order
-from store.models import Product
- 
+from store.models import Product, ProductImage
 
 
 class DeliveryForm(forms.ModelForm):
@@ -76,3 +76,32 @@ class ProductForm(forms.ModelForm):
         if mrp <= 0:
             raise forms.ValidationError("MRP must be more than 0.")
         return mrp
+    
+    
+MAX_IMAGE_MB = 5
+
+
+class ProductImageForm(forms.ModelForm):
+    class Meta:
+        model = ProductImage
+        fields = ["image", "sort_order"]
+        labels = {"sort_order": "Display order"}
+        widgets = {"image": forms.FileInput(attrs={"accept": "image/*"})}
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        # Check the size only for a file uploaded just now, not for saved photos.
+        if image and "image" in self.changed_data and image.size > MAX_IMAGE_MB * 1024 * 1024:
+            raise forms.ValidationError(
+                f"This photo is too large. The maximum size is {MAX_IMAGE_MB} MB."
+            )
+        return image
+
+
+ProductImageFormSet = inlineformset_factory(
+    Product,
+    ProductImage,
+    form=ProductImageForm,
+    extra=3,
+    can_delete=True,
+)

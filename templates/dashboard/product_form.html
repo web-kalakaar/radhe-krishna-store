@@ -7,7 +7,7 @@
   <h1>{{ title }}</h1>
 
   <section class="form-card form-card--wide form-narrow">
-    <form method="post" novalidate>
+    <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       {% include "partials/form_fields.html" %}
 
@@ -24,8 +24,51 @@
         </p>
       {% endif %}
 
-      <button type="submit" class="btn">Save product</button>
-      <a href="{% url 'dashboard:product_list' %}">Cancel</a>
+      <h2>Photos</h2>
+      <p class="help">
+        Add at least 3 photos, up to 5 MB each. The photo with the lowest display
+        order is the main photo shown in the shop.
+      </p>
+
+      {{ image_formset.management_form }}
+      {% for error in image_formset.non_form_errors %}
+        <p class="form-error">{{ error }}</p>
+      {% endfor %}
+
+      {% for photo_form in image_formset %}
+        <div class="photo-row">
+          {% for hidden in photo_form.hidden_fields %}{{ hidden }}{% endfor %}
+
+          {% if photo_form.instance.pk %}
+            <img src="{{ photo_form.instance.image.url }}" alt="">
+          {% else %}
+            <div class="photo-row__empty">New</div>
+          {% endif %}
+
+          <div>
+            {{ photo_form.image }}
+            {% for error in photo_form.image.errors %}
+              <p class="form-error">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div>
+            <label>Display order {{ photo_form.sort_order }}</label>
+            {% for error in photo_form.sort_order.errors %}
+              <p class="form-error">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          {% if photo_form.instance.pk %}
+            <label>{{ photo_form.DELETE }} Remove</label>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <p>
+        <button type="submit" class="btn">Save product</button>
+        <a href="{% url 'dashboard:product_list' %}">Cancel</a>
+      </p>
     </form>
   </section>
 {% endblock %}
