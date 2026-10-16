@@ -160,7 +160,7 @@ def checkout(request):
             messages.success(
                 request, f"Order {order.order_number} placed successfully!"
             )
-            return redirect("orders:cart")  # replaced by a confirmation page next step
+            return redirect("orders:order_detail", pk=order.pk)
     else:
         form = CheckoutForm(user=request.user)
 
