@@ -59,3 +59,23 @@ class Address(models.Model):
                     pk=self.pk
                 ).update(is_default=False)
             super().save(*args, **kwargs)
+            
+            
+class OTP(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="otps"
+    )
+    mobile = models.CharField(max_length=10)
+    code_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name = "OTP"
+        verbose_name_plural = "OTPs"
+
+    def __str__(self):
+        return f"OTP for {self.mobile}"

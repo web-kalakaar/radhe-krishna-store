@@ -140,3 +140,6 @@ LOGOUT_REDIRECT_URL = "store:home"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Orders
 REQUIRE_MOBILE_VERIFICATION = False  # switched on in the OTP phase
+# OTP: "demo" prints the code in the terminal AND shows it on screen,
+# "console" only prints it. A real SMS provider would be added as "sms".
+OTP_BACKEND = config("OTP_BACKEND", default="demo")
