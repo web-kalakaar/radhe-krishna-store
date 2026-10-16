@@ -13,8 +13,13 @@ from store.stock import StockError, adjust_stock, set_stock
 from store.utils import paginate
 
 from .decorators import staff_required
-from .forms import DeliveryForm, ProductForm, ProductImageFormSet, StockAdjustForm
-
+from .forms import (
+    DeliveryForm,
+    ProductFeatureFormSet,
+    ProductForm,
+    ProductImageFormSet,
+    StockAdjustForm,
+)
 LOW_STOCK_LIMIT = 5
 
 
@@ -281,20 +286,23 @@ def product_list(request):
         },
     )
 
-
 @staff_required
 def product_create(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
         image_formset = ProductImageFormSet(request.POST, request.FILES)
+        feature_formset = ProductFeatureFormSet(request.POST)
         form_ok = form.is_valid()
         photos_ok = image_formset.is_valid()
+        features_ok = feature_formset.is_valid()
 
-        if form_ok and photos_ok:
+        if form_ok and photos_ok and features_ok:
             with transaction.atomic():
                 product = form.save()
                 image_formset.instance = product
                 image_formset.save()
+                feature_formset.instance = product
+                feature_formset.save()
                 if product.stock:
                     StockLog.objects.create(
                         product=product,
@@ -310,6 +318,7 @@ def product_create(request):
     else:
         form = ProductForm()
         image_formset = ProductImageFormSet()
+        feature_formset = ProductFeatureFormSet()
 
     return render(
         request,
@@ -317,6 +326,7 @@ def product_create(request):
         {
             "form": form,
             "image_formset": image_formset,
+            "feature_formset": feature_formset,
             "title": "Add product",
             "product": None,
         },
@@ -332,19 +342,23 @@ def product_edit(request, pk):
         image_formset = ProductImageFormSet(
             request.POST, request.FILES, instance=product
         )
+        feature_formset = ProductFeatureFormSet(request.POST, instance=product)
         form_ok = form.is_valid()
         photos_ok = image_formset.is_valid()
+        features_ok = feature_formset.is_valid()
 
-        if form_ok and photos_ok:
+        if form_ok and photos_ok and features_ok:
             with transaction.atomic():
                 product = form.save()
                 image_formset.save()
+                feature_formset.save()
             messages.success(request, f"{product.name} has been updated.")
             warn_if_few_photos(request, product)
             return redirect("dashboard:product_list")
     else:
         form = ProductForm(instance=product)
         image_formset = ProductImageFormSet(instance=product)
+        feature_formset = ProductFeatureFormSet(instance=product)
 
     return render(
         request,
@@ -352,6 +366,7 @@ def product_edit(request, pk):
         {
             "form": form,
             "image_formset": image_formset,
+            "feature_formset": feature_formset,
             "title": "Edit product",
             "product": product,
         },

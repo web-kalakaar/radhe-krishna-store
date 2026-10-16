@@ -985,3 +985,28 @@ a.btn {
   border: 1px solid var(--color-border);
   border-radius: 4px;
 }
+/* Product feature rows */
+.feature-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+}
+
+.feature-row input[type="text"] {
+  width: 190px;
+  padding: 0.4rem 0.5rem;
+  font: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.feature-row input[type="number"] {
+  width: 64px;
+  padding: 0.4rem 0.3rem;
+  font: inherit;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+

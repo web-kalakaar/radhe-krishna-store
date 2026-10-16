@@ -1,8 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
-
+from store.models import Product, ProductFeature, ProductImage
 from orders.models import Order
-from store.models import Product, ProductImage
 
 
 class DeliveryForm(forms.ModelForm):
@@ -103,5 +102,25 @@ ProductImageFormSet = inlineformset_factory(
     ProductImage,
     form=ProductImageForm,
     extra=3,
+    can_delete=True,
+)
+
+
+class ProductFeatureForm(forms.ModelForm):
+    class Meta:
+        model = ProductFeature
+        fields = ["name", "value", "sort_order"]
+        labels = {"name": "Feature", "sort_order": "Order"}
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "e.g. Material"}),
+            "value": forms.TextInput(attrs={"placeholder": "e.g. Wood"}),
+        }
+
+
+ProductFeatureFormSet = inlineformset_factory(
+    Product,
+    ProductFeature,
+    form=ProductFeatureForm,
+    extra=4,
     can_delete=True,
 )

@@ -23,7 +23,44 @@
           The web address of the product is made from its name.
         </p>
       {% endif %}
+      <h2>Key features</h2>
+      <p class="help">
+        Extra details shown in a table on the product page, for example
+        Material, Size or Connectivity. The brand has its own field above.
+      </p>
 
+      {{ feature_formset.management_form }}
+      {% for error in feature_formset.non_form_errors %}
+        <p class="form-error">{{ error }}</p>
+      {% endfor %}
+
+      {% for feature_form in feature_formset %}
+        <div class="feature-row">
+          {% for hidden in feature_form.hidden_fields %}{{ hidden }}{% endfor %}
+
+          <div>
+            {{ feature_form.name }}
+            {% for error in feature_form.name.errors %}
+              <p class="form-error">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div>
+            {{ feature_form.value }}
+            {% for error in feature_form.value.errors %}
+              <p class="form-error">{{ error }}</p>
+            {% endfor %}
+          </div>
+
+          <div>
+            <label>Order {{ feature_form.sort_order }}</label>
+          </div>
+
+          {% if feature_form.instance.pk %}
+            <label>{{ feature_form.DELETE }} Remove</label>
+          {% endif %}
+        </div>
+      {% endfor %}
       <h2>Photos</h2>
       <p class="help">
         Add at least 3 photos, up to 5 MB each. The photo with the lowest display
