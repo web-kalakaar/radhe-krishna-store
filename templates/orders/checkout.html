@@ -22,8 +22,11 @@
 
       <section class="form-card">
         <h2>Contact number</h2>
-        <p>{{ profile.mobile }} <a href="{% url 'accounts:profile' %}">Change</a></p>
-        <p class="help">The delivery person will call this number.</p>
+        <p>
+          {{ profile.mobile }}
+          {% if profile.is_mobile_verified %}<span class="tag tag--ok">Verified</span>{% endif %}
+          <a href="{% url 'accounts:profile' %}">Change</a>
+        </p>        <p class="help">The delivery person will call this number.</p>
       </section>
 
       <section class="form-card">

@@ -6,13 +6,16 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from urllib.parse import urlencode
 
+from django.urls import reverse
 from accounts.models import Profile
 from store.models import Product
 from store.utils import paginate
 from .forms import CheckoutForm, QuantityForm
 from .models import Cart, CartItem, Order
 from .services import CheckoutError, cancel_order, delivery_charge_for, place_order
+
 
 @login_required
 def cart_detail(request):
@@ -82,9 +85,7 @@ def update_cart_item(request, item_id):
     available = item.product.stock
 
     if quantity > available:
-        messages.warning(
-            request, f"Only {available} of {item.product.name} available."
-        )
+        messages.warning(request, f"Only {available} of {item.product.name} available.")
         quantity = available
 
     if quantity >= 1:
@@ -108,6 +109,7 @@ def remove_cart_item(request, item_id):
     messages.success(request, f"{name} removed from your cart.")
     return redirect("orders:cart")
 
+
 @login_required
 def checkout(request):
     cart = Cart.objects.filter(user=request.user).first()
@@ -127,12 +129,21 @@ def checkout(request):
 
     profile = Profile.objects.filter(user=request.user).first()
     if profile is None:
-        messages.warning(request, "Please add your mobile number before placing an order.")
+        messages.warning(
+            request, "Please add your mobile number before placing an order."
+        )
         return redirect("accounts:profile")
 
     if settings.REQUIRE_MOBILE_VERIFICATION and not profile.is_mobile_verified:
-        messages.warning(request, "Please verify your mobile number before placing an order.")
-        return redirect("accounts:profile")
+        messages.warning(
+            request, "Please verify your mobile number before placing your order."
+        )
+        verify_url = (
+            reverse("accounts:verify_mobile")
+            + "?"
+            + urlencode({"next": reverse("orders:checkout")})
+        )
+        return redirect(verify_url)
 
     if not request.user.addresses.exists():
         messages.info(request, "Add a delivery address to continue.")
@@ -146,7 +157,9 @@ def checkout(request):
             except CheckoutError as error:
                 messages.error(request, str(error))
                 return redirect("orders:cart")
-            messages.success(request, f"Order {order.order_number} placed successfully!")
+            messages.success(
+                request, f"Order {order.order_number} placed successfully!"
+            )
             return redirect("orders:cart")  # replaced by a confirmation page next step
     else:
         form = CheckoutForm(user=request.user)
@@ -166,13 +179,15 @@ def checkout(request):
             "total": subtotal + delivery_charge,
         },
     )
-    
+
+
 @login_required
 def order_detail(request, pk):
     order = get_object_or_404(
         Order.objects.prefetch_related("items"), pk=pk, user=request.user
     )
     return render(request, "orders/order_detail.html", {"order": order})
+
 
 @login_required
 def order_list(request):
@@ -183,7 +198,8 @@ def order_list(request):
         "orders/order_list.html",
         {"page_obj": page_obj, "querystring": querystring},
     )
-    
+
+
 @login_required
 @require_POST
 def cancel_order_view(request, pk):
