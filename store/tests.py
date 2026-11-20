@@ -1,11 +1,10 @@
 from decimal import Decimal
 
 from django.db import IntegrityError, transaction
-from django.test import TestCase
-
+from django.test import RequestFactory, TestCase
 from .models import Category, Product, StockLog
 from .stock import StockError, adjust_stock
-
+from django.views.defaults import server_error
 
 def make_product(category, **overrides):
     """Create a product with sensible defaults. Pass only what a test cares about."""
@@ -131,3 +130,17 @@ class AdjustStockTests(TestCase):
         with self.assertRaises(StockError):
             adjust_stock(999999, 1, StockLog.Reason.RESTOCK)
         self.assertEqual(StockLog.objects.count(), 0)
+
+class ErrorPageTests(TestCase):
+    def test_an_unknown_address_shows_the_custom_404_page(self):
+        response = self.client.get("/this-page-does-not-exist/")
+
+        self.assertContains(response, "Page not found", status_code=404)
+        self.assertContains(response, "Back to the shop", status_code=404)
+
+    def test_the_500_page_is_a_complete_page_with_a_link_home(self):
+        response = server_error(RequestFactory().get("/"))
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn(b"Something went wrong", response.content)
+        self.assertIn(b'href="/"', response.content)

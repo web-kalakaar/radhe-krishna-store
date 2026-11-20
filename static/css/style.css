@@ -1124,3 +1124,16 @@ h2 {
     transform: none;
   }
 }
+/* Error pages */
+.error-page {
+  max-width: 480px;
+  margin: 3rem auto;
+  text-align: center;
+}
+
+.error-page__code {
+  margin: 0;
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
