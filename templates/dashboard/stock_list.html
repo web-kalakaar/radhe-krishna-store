@@ -8,10 +8,10 @@
 <form method="get" class="filters">
   <input type="search" name="q" value="{{ query }}" placeholder="Search product or brand" maxlength="100">
   <select name="filter">
-    <option value="">All products</option>
-    <option value="low" {% if stock_filter=="low" %}selected{% endif %}>Low stock (1 to {{ low_stock_limit }})</option>
-    <option value="out" {% if stock_filter=="out" %}selected{% endif %}>Out of stock</option>
-  </select>
+  <option value="">All products</option>
+  <option value="low" {% if stock_filter == "low" %}selected{% endif %}>Low stock (1 to {{ low_stock_limit }})</option>
+  <option value="out" {% if stock_filter == "out" %}selected{% endif %}>Out of stock</option>
+</select>
   <button type="submit" class="btn">Filter</button>
   <a href="{% url 'dashboard:stock_list' %}">Clear</a>
 </form>
